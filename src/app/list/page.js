@@ -1,22 +1,24 @@
-export default function List() {
-  const product = ["Tomatoes", "Pasta", "Coconut"];
+import Link from "next/link";
+import { connectDB } from "../../../util/database";
+import DetailLink from "./DetailLink";
+
+export default async function List() {
+  const db = (await connectDB).db("forum");
+  const result = await db.collection("post").find().toArray();
 
   return (
-    <div>
-      <h4 className="title">상품목록</h4>
-      {product.map((product, i) => {
+    <div className="list-bg">
+      {result.map((post, i) => {
         return (
-          <div className="food">
-            <h4>
-              <img className="food-img" src={`/food${i}.png`} alt="" />
-              {product} {i + 1} $40
-            </h4>
+          <div className="list-item" key={i}>
+            <Link href={`/detail/${post._id}`}>
+              <h4>{post.title}</h4>
+            </Link>
+            <DetailLink />
+            <p>1월 1일</p>
           </div>
         );
       })}
     </div>
   );
 }
-
-// 이미지 최적화 (lazy loading, 사이즈최적화, layout shift방지 ...)
-// 방법 -> 이미지 import 해서 사용
