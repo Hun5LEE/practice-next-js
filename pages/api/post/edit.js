@@ -1,18 +1,24 @@
 import { ObjectId } from "mongodb";
 import { connectDB } from "../../../util/database";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    if (req.body.title === "" || req.body.content === "") {
-      return res.status(500).json("미입력");
-    }
     try {
-      const copyReq = { title: req.body.title, content: req.body.content };
-      const db = (await connectDB).db("forum");
-      await db
-        .collection("post")
-        .updateOne({ _id: new ObjectId(req.body._id) }, { $set: copyReq });
-      return res.status(200).redirect("/list");
+      let session = await getServerSession(req, res, authOptions);
+      if (session) {
+        if (req.body.title === "" || req.body.content === "") {
+          return res.status(500).json("미입력");
+        }
+        const copyReq = { title: req.body.title, content: req.body.content };
+        const db = (await connectDB).db("forum");
+        await db
+          .collection("post")
+          .updateOne({ _id: new ObjectId(req.body._id) }, { $set: copyReq });
+        return res.status(200).redirect("/list");
+      }
+      return res.status(500).json("로그인하시오");
     } catch (err) {
       console.log("에러");
     }

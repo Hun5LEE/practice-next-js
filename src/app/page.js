@@ -1,19 +1,18 @@
 import { connectDB } from "../../util/database";
-import styles from "./page.module.css";
 
 export default async function Home() {
   const db = (await connectDB).db("forum");
-  const result = await db.collection("user").find().toArray();
+  await db.collection("user").find().toArray();
 
   return (
     <div>
       <h2>회원가입</h2>
-      <form action="/api/login/user" method="POST">
+      {/* <form action="/api/login/user" method="POST">
         <input name="name" type="text" placeholder="이름" />
         <input name="email" type="email" placeholder="이메일" />
         <input name="password" type="password" placeholder="비밀번호" />
         <button type="submit">가입하기</button>
-      </form>
+      </form> */}
     </div>
   );
 }

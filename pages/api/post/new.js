@@ -1,22 +1,29 @@
+import { getServerSession } from "next-auth";
 import { connectDB } from "../../../util/database";
+import { authOptions } from "../auth/[...nextauth]";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    if (req.body.title === "" || req.body.content === "") {
-      return res.status(500).json("미입력");
-    }
     try {
-      let date = new Date();
-      let todayDate = `${date.getFullYear()}년 ${
-        date.getMonth() + 1
-      }월 ${date.getDate()}일 `;
-      const db = (await connectDB).db("forum");
-      const result = await db.collection("post").insertOne({
-        title: `${req.body.title}`,
-        content: `${req.body.content}`,
-        date: `${todayDate}`,
-      });
-      return res.status(200).redirect("/list");
+      const session = await getServerSession(req, res, authOptions);
+      if (session) {
+        if (req.body.title === "" || req.body.content === "") {
+          return res.status(500).json("미입력");
+        }
+        let date = new Date();
+        let todayDate = `${date.getFullYear()}년 ${
+          date.getMonth() + 1
+        }월 ${date.getDate()}일 `;
+        const db = (await connectDB).db("forum");
+        const result = await db.collection("post").insertOne({
+          title: `${req.body.title}`,
+          content: `${req.body.content}`,
+          date: `${todayDate}`,
+          author: session.user.email,
+        });
+        return res.status(200).redirect("/list");
+      }
+      return res.status(500).json("로그인하시오");
     } catch (err) {
       console.log("에러");
     }
